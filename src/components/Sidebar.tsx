@@ -53,8 +53,8 @@ export const Sidebar = () => {
   return (
     <div
       className={cn(
-        "bg-card border-r flex flex-col transition-all duration-300",
-        collapsed ? "w-16" : "w-64"
+        "bg-card border-r flex flex-col transition-all duration-300 md:relative absolute md:translate-x-0 z-40",
+        collapsed ? "w-16 -translate-x-full md:translate-x-0" : "w-64 translate-x-0"
       )}
     >
       <div className="p-4 border-b">
