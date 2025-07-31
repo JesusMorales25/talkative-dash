@@ -5,14 +5,14 @@ import { LeadsChart } from "@/components/LeadsChart";
 
 export const Dashboard = () => {
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground">Resumen de actividad de tu plataforma WhatsApp CRM</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
         <StatCard
           title="Leads nuevos hoy"
           value={23}
@@ -48,7 +48,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4 lg:gap-6">
         <ConversationsChart />
         <LeadsChart />
       </div>

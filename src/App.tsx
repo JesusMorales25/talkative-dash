@@ -3,6 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Leads from "./pages/Leads";
 import Chat from "./pages/Chat";
@@ -15,22 +18,47 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/leads" element={<Leads />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/reportes" element={<Reports />} />
-          <Route path="/configuracion" element={<Settings />} />
-          <Route path="/usuarios" element={<Users />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ResponsiveLayout>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/leads" element={<Leads />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route 
+                path="/reportes" 
+                element={
+                  <ProtectedRoute requiredRoles={['admin', 'supervisor']}>
+                    <Reports />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/configuracion" 
+                element={
+                  <ProtectedRoute requiredRoles={['admin']}>
+                    <Settings />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/usuarios" 
+                element={
+                  <ProtectedRoute requiredRoles={['admin']}>
+                    <Users />
+                  </ProtectedRoute>
+                } 
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ResponsiveLayout>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

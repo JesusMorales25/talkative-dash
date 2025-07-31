@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -107,8 +106,7 @@ const Chat = () => {
   };
 
   return (
-    <Layout>
-      <div className="flex h-[calc(100vh-4rem)] bg-background">
+    <div className="flex h-[calc(100vh-12rem)] bg-background">
         {/* Panel izquierdo - Lista de conversaciones */}
         <div className="w-full md:w-80 lg:w-96 border-r border-border flex flex-col">
           {/* Header de conversaciones */}
@@ -361,8 +359,7 @@ const Chat = () => {
             </div>
           </div>
         )}
-      </div>
-    </Layout>
+    </div>
   );
 };
 
