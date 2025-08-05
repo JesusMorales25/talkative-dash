@@ -26,6 +26,7 @@ interface NavigationItem {
   href: string;
   icon: any;
   requiredRoles: UserRole[];
+  enabled: boolean;
 }
 
 const navigation: NavigationItem[] = [
@@ -34,36 +35,42 @@ const navigation: NavigationItem[] = [
     href: "/",
     icon: LayoutDashboard,
     requiredRoles: ['admin', 'supervisor', 'agente'],
+    enabled: true,
   },
   {
     name: "Leads",
     href: "/leads",
     icon: Users,
     requiredRoles: ['admin', 'supervisor', 'agente'],
+    enabled: true,
   },
   {
     name: "Chat en vivo",
     href: "/chat",
     icon: MessageSquare,
     requiredRoles: ['admin', 'supervisor', 'agente'],
+    enabled: false,
   },
   {
     name: "Reportes",
     href: "/reportes",
     icon: BarChart3,
     requiredRoles: ['admin', 'supervisor'],
+    enabled: true,
   },
   {
     name: "Usuarios",
     href: "/usuarios",
     icon: UserCog,
     requiredRoles: ['admin'],
+    enabled: false,
   },
   {
     name: "Configuración",
     href: "/configuracion",
     icon: Settings,
     requiredRoles: ['admin'],
+    enabled: false,
   },
 ];
 
@@ -72,9 +79,9 @@ export function AppSidebar() {
   const location = useLocation();
   const { hasPermission } = useAuth();
 
-  // Filter navigation based on user permissions
+  // Filter navigation based on user permissions and enabled status
   const filteredNavigation = navigation.filter(item => 
-    hasPermission(item.requiredRoles)
+    hasPermission(item.requiredRoles) && item.enabled
   );
 
   return (
