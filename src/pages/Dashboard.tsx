@@ -12,7 +12,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
         <StatCard
           title="Leads nuevos"
           value={23}
@@ -36,6 +36,14 @@ export const Dashboard = () => {
           icon={TrendingUp}
           trend={{ value: 15.3, isPositive: true }}
           variant="success"
+        />
+        <StatCard
+          title="Tiempo promedio de respuesta del bot"
+          value="2.3 min"
+          description="Últimas 24h"
+          icon={Clock}
+          trend={{ value: -15.2, isPositive: false }}
+          variant="warning"
         />
       </div>
 
