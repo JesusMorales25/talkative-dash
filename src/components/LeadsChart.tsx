@@ -2,10 +2,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const data = [
-  { name: 'Nuevos', value: 35, color: 'hsl(var(--info))' },
-  { name: 'En seguimiento', value: 42, color: 'hsl(var(--warning))' },
-  { name: 'Calificados', value: 28, color: 'hsl(var(--success))' },
-  { name: 'Cerrados', value: 15, color: 'hsl(var(--muted-foreground))' },
+  { name: 'CURIOSO', value: 45, color: 'hsl(var(--info))' },
+  { name: 'REGISTRO', value: 38, color: 'hsl(var(--warning))' },
+  { name: 'PROSPECTO', value: 32, color: 'hsl(var(--success))' },
 ];
 
 const CustomTooltip = ({ active, payload }: any) => {

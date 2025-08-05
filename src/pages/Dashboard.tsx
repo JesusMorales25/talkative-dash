@@ -12,9 +12,9 @@ export const Dashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
         <StatCard
-          title="Leads nuevos hoy"
+          title="Leads nuevos"
           value={23}
           description="Desde ayer"
           icon={Users}
@@ -22,7 +22,7 @@ export const Dashboard = () => {
           variant="success"
         />
         <StatCard
-          title="Conversaciones activas"
+          title="Conversaciones de hoy"
           value={47}
           description="En tiempo real"
           icon={MessageCircle}
@@ -30,20 +30,12 @@ export const Dashboard = () => {
           variant="info"
         />
         <StatCard
-          title="Tasa de respuesta promedio"
-          value="92%"
-          description="Últimos 7 días"
+          title="Contactos registrados"
+          value={234}
+          description="Total acumulado"
           icon={TrendingUp}
-          trend={{ value: 3.1, isPositive: true }}
+          trend={{ value: 15.3, isPositive: true }}
           variant="success"
-        />
-        <StatCard
-          title="Tiempo promedio de respuesta"
-          value="2.3 min"
-          description="Últimas 24h"
-          icon={Clock}
-          trend={{ value: -15.2, isPositive: false }}
-          variant="warning"
         />
       </div>
 
