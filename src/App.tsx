@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -24,40 +24,21 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <ResponsiveLayout>
-            <Routes>
-<Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-<Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
-<Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-<Route path="/login" element={<Login />} />
-              <Route 
-                path="/reportes" 
-                element={
-                  <ProtectedRoute requiredRoles={['admin', 'superadmin']}>
-                    <Reports />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/configuracion" 
-                element={
-                  <ProtectedRoute requiredRoles={['admin', 'superadmin']}>
-                    <Settings />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/usuarios" 
-                element={
-                  <ProtectedRoute requiredRoles={['admin', 'superadmin']}>
-                    <Users />
-                  </ProtectedRoute>
-                } 
-              />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </ResponsiveLayout>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+
+            <Route element={<ProtectedRoute><ResponsiveLayout><Outlet /></ResponsiveLayout></ProtectedRoute>}>
+              <Route path="/" element={<Index />} />
+              <Route path="/leads" element={<Leads />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/reportes" element={<Reports />} />
+              <Route path="/configuracion" element={<Settings />} />
+              <Route path="/usuarios" element={<Users />} />
+            </Route>
+
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
