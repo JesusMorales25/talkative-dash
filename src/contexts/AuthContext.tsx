@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as authService from '@/services/authService';
 
-export type UserRole = 'admin' | 'supervisor' | 'agente';
+export type UserRole = 'superadmin' | 'admin' | 'user';
 
 export interface User {
   id: string;
@@ -54,6 +54,8 @@ const logout = () => {
 
   const hasPermission = (requiredRoles: UserRole[]): boolean => {
     if (!user) return false;
+    if (user.role === 'superadmin') return true;
+    if (!requiredRoles || requiredRoles.length === 0) return true;
     return requiredRoles.includes(user.role);
   };
 

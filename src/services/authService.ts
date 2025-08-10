@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 const TOKEN_KEY = "auth_token";
 const API_BASE_KEY = "api_url"; // Optional: override base URL via localStorage
 
-type UserRole = "admin" | "supervisor" | "agente";
+type UserRole = "superadmin" | "admin" | "user";
 
 interface TokenPayload {
   sub?: string;
@@ -95,10 +95,16 @@ export function getUserRole(): string | null {
   return getCurrentUser()?.role ?? null;
 }
 
-function mapBackendRole(raw: string): "admin" | "supervisor" | "agente" {
+function mapBackendRole(raw: string): "superadmin" | "admin" | "user" {
   const normalized = raw.replace(/^ROLE_/i, "").toLowerCase();
+  if (normalized.includes("superadmin")) return "superadmin";
   if (normalized.includes("admin")) return "admin";
-  if (normalized.includes("supervisor")) return "supervisor";
-  if (normalized.includes("agent") || normalized.includes("agente")) return "agente";
-  return "agente";
+  if (
+    normalized.includes("user") ||
+    normalized.includes("agent") ||
+    normalized.includes("agente") ||
+    normalized.includes("supervisor")
+  )
+    return "user";
+  return "user";
 }

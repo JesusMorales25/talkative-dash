@@ -26,14 +26,14 @@ const App = () => (
         <BrowserRouter>
           <ResponsiveLayout>
             <Routes>
-<Route path="/" element={<Index />} />
-<Route path="/leads" element={<Leads />} />
-<Route path="/chat" element={<Chat />} />
+<Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+<Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
+<Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
 <Route path="/login" element={<Login />} />
               <Route 
                 path="/reportes" 
                 element={
-                  <ProtectedRoute requiredRoles={['admin', 'supervisor']}>
+                  <ProtectedRoute requiredRoles={['admin', 'superadmin']}>
                     <Reports />
                   </ProtectedRoute>
                 } 
@@ -41,7 +41,7 @@ const App = () => (
               <Route 
                 path="/configuracion" 
                 element={
-                  <ProtectedRoute requiredRoles={['admin']}>
+                  <ProtectedRoute requiredRoles={['admin', 'superadmin']}>
                     <Settings />
                   </ProtectedRoute>
                 } 
@@ -49,7 +49,7 @@ const App = () => (
               <Route 
                 path="/usuarios" 
                 element={
-                  <ProtectedRoute requiredRoles={['admin']}>
+                  <ProtectedRoute requiredRoles={['admin', 'superadmin']}>
                     <Users />
                   </ProtectedRoute>
                 } 
