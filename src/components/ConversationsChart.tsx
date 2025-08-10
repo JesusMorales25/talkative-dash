@@ -1,17 +1,20 @@
+// src/components/ConversationsChart.tsx
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const data = [
-  { day: 'Lun', conversations: 24 },
-  { day: 'Mar', conversations: 32 },
-  { day: 'Mié', conversations: 28 },
-  { day: 'Jue', conversations: 45 },
-  { day: 'Vie', conversations: 52 },
-  { day: 'Sáb', conversations: 18 },
-  { day: 'Dom', conversations: 12 },
-];
+// ✅ Tipamos los datos que recibe el componente
+type ConversacionPorDia = {
+  dia: string;
+  total_conversaciones: number;
+};
 
-export const ConversationsChart = () => {
+interface ConversationsChartProps {
+  data: ConversacionPorDia[];
+}
+
+// ✅ Exportación nombrada
+export const ConversationsChart = ({ data }: ConversationsChartProps) => {
   return (
     <Card>
       <CardHeader>
@@ -22,7 +25,7 @@ export const ConversationsChart = () => {
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis 
-              dataKey="day" 
+              dataKey="dia" // ✅ OJO: usa el campo correcto según tu API
               className="text-muted-foreground" 
               tick={{ fontSize: 12 }}
             />
@@ -39,7 +42,7 @@ export const ConversationsChart = () => {
               }}
             />
             <Bar 
-              dataKey="conversations" 
+              dataKey="total_conversaciones" // ✅ OJO: campo correcto
               fill="hsl(var(--primary))" 
               radius={[4, 4, 0, 0]}
             />
