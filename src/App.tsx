@@ -13,6 +13,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -25,9 +26,10 @@ const App = () => (
         <BrowserRouter>
           <ResponsiveLayout>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/leads" element={<Leads />} />
-              <Route path="/chat" element={<Chat />} />
+<Route path="/" element={<Index />} />
+<Route path="/leads" element={<Leads />} />
+<Route path="/chat" element={<Chat />} />
+<Route path="/login" element={<Login />} />
               <Route 
                 path="/reportes" 
                 element={

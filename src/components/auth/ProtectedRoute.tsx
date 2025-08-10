@@ -1,6 +1,7 @@
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShieldOff } from "lucide-react";
+import { Navigate, useLocation } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,16 +10,10 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRoles = [] }: ProtectedRouteProps) {
   const { user, hasPermission } = useAuth();
+  const location = useLocation();
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-4">Acceso no autorizado</h2>
-          <p className="text-muted-foreground">Debes iniciar sesión para acceder a esta página.</p>
-        </div>
-      </div>
-    );
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (requiredRoles.length > 0 && !hasPermission(requiredRoles)) {
