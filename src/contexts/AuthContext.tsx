@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import * as authService from '@/services/authService';
 
-export type UserRole = 'admin' | 'supervisor' | 'agente';
+export type UserRole = 'superadmin' | 'admin' | 'user';
 
 export interface User {
   id: string;
@@ -12,7 +13,7 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, remember?: boolean) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   hasPermission: (requiredRoles: UserRole[]) => boolean;
@@ -20,42 +21,41 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user data - in real app this would come from your backend
-const mockUser: User = {
-  id: '1',
-  name: 'Juan Pérez',
-  email: 'juan@empresa.com',
-  role: 'admin', // Change to 'agente' or 'supervisor' to test different roles
-};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Simulate checking existing session
-    const timer = setTimeout(() => {
-      setUser(mockUser);
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setUser(mockUser);
+useEffect(() => {
+  // Initialize from stored token if present
+  const initialize = async () => {
+    const currentUser = authService.getCurrentUser();
+    setUser(currentUser);
     setIsLoading(false);
   };
+  initialize();
+}, []);
 
-  const logout = () => {
-    setUser(null);
-  };
+const login = async (email: string, password: string, remember?: boolean) => {
+  setIsLoading(true);
+  try {
+    await authService.login(email, password, !!remember);
+    const currentUser = authService.getCurrentUser();
+    setUser(currentUser);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const logout = () => {
+  authService.logout();
+  setUser(null);
+};
 
   const hasPermission = (requiredRoles: UserRole[]): boolean => {
     if (!user) return false;
+    if (user.role === 'superadmin') return true;
+    if (!requiredRoles || requiredRoles.length === 0) return true;
     return requiredRoles.includes(user.role);
   };
 
