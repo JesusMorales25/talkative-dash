@@ -1,8 +1,7 @@
-// Authentication service for handling JWT-based login/logout
 import { jwtDecode } from "jwt-decode";
 
-const TOKEN_KEY = "auth_token";
-const API_BASE_KEY = "api_url"; // Optional: override base URL via localStorage
+const TOKEN_KEY = "token"; // 🔹 Usamos exactamente el mismo que en el login
+const API_BASE_KEY = "api_url";
 
 type UserRole = "superadmin" | "admin" | "user";
 
@@ -12,23 +11,27 @@ interface TokenPayload {
   role?: string | UserRole;
   id?: string | number;
   name?: string;
+  empresa?: string;     // posibles nombres que el backend use
+  empresaId?: string;   // muchos tokens usan 'empresaId'
+  company?: string;
+  avatar?: string;
   exp?: number;
   [key: string]: unknown;
 }
 
 function getApiBaseUrl() {
-  return localStorage.getItem(API_BASE_KEY) || "http://localhost:8080";
+  return localStorage.getItem(API_BASE_KEY) || "http://localhost:8081";
 }
 
 function getStorage(remember?: boolean) {
-  return remember ? window.localStorage : window.sessionStorage;
+  return remember ? window.localStorage : window.localStorage; // 🔹 Forzado localStorage
 }
 
 export async function login(email: string, password: string, remember = false) {
   const res = await fetch(`${getApiBaseUrl()}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username: email, password }),
   });
 
   if (!res.ok) {
@@ -36,7 +39,9 @@ export async function login(email: string, password: string, remember = false) {
     try {
       const err = await res.json();
       message = err?.message || message;
-    } catch {}
+    } catch {
+      // Intentionally ignored: error parsing response JSON
+    }
     if (res.status === 401) message = "Credenciales inválidas";
     throw new Error(message);
   }
@@ -46,56 +51,108 @@ export async function login(email: string, password: string, remember = false) {
   if (!token) throw new Error("Token no recibido desde el servidor");
 
   saveToken(token, remember);
-  return token;
+
+  // Retornamos usuario decodificado
+  const user = getCurrentUser();
+  return { token, user };
 }
 
 export function saveToken(token: string, remember = false) {
-  // Clean any previous token
   removeToken();
   const storage = getStorage(remember);
   storage.setItem(TOKEN_KEY, token);
 }
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY) || null; // 🔹 Sólo localStorage para evitar desincronizar
+}
+
+export async function fetchWithAuth(input: RequestInfo, init?: RequestInit) {
+  const token = getToken();
+  const headers = {
+    ...(init?.headers || {}),
+    Authorization: token ? `Bearer ${token}` : undefined,
+    "Content-Type": "application/json",
+  };
+
+  const response = await fetch(input, { ...init, headers });
+
+  if (response.status === 401) {
+    logout();
+    window.location.href = "/login";
+  }
+
+  return response;
 }
 
 export function removeToken() {
   localStorage.removeItem(TOKEN_KEY);
-  sessionStorage.removeItem(TOKEN_KEY);
 }
 
 export function logout() {
-  removeToken();
+  try {
+    // Elimina token
+    removeToken();
+
+    // Limpia API base si quieres forzar a reconfigurar
+    localStorage.removeItem("api_url");
+
+    // Limpia cualquier dato relacionado a sesión
+    localStorage.removeItem("user_preferences");
+    sessionStorage.clear();
+
+    // Si tienes un AuthContext, también limpia su estado
+    if (typeof window !== "undefined") {
+      // Forzamos un reload para resetear estados en memoria
+      window.location.href = "/login";
+    }
+  } catch (err) {
+    console.error("Error al cerrar sesión:", err);
+  }
 }
+
 
 export function decodeToken(token: string): TokenPayload {
   return jwtDecode<TokenPayload>(token);
 }
 
-export function getCurrentUser(): { id: string; email: string; name: string; role: UserRole } | null {
+export function getCurrentUser(): {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  company?: string;
+} | null {
   const token = getToken();
   if (!token) return null;
+
   try {
+    // decodifica el payload del token (usa jwtDecode)
     const p = decodeToken(token);
-    const rawRole = (p.role as string) || "agente";
+
+    // ROLE_... -> normalize y mapear a UserRole
+    const rawRole = (p.role as string) ?? "user";
     const role: UserRole = mapBackendRole(rawRole);
+
+    // id/email/name con fallbacks razonables
     const id = (p.id ?? p.sub ?? "").toString();
-    const email = (p.email ?? "").toString();
+    const email = (p.email ?? p.sub ?? "").toString();
     const name = (p.name ?? email).toString();
-    return { id, email, name, role };
-  } catch {
-    // Token inválido
+
+    // leer empresa: chequeamos varios nombres que podría usar el backend
+    const companyRaw = p.empresaId ?? p.empresa ?? p.company ?? "";
+    const company = companyRaw ? companyRaw.toString() : undefined;
+
+    return { id, email, name, role, company };
+  } catch (err) {
+    // token inválido -> limpiar e indicar no-autenticado
     removeToken();
     return null;
   }
 }
 
-export function getUserRole(): string | null {
-  return getCurrentUser()?.role ?? null;
-}
 
-function mapBackendRole(raw: string): "superadmin" | "admin" | "user" {
+function mapBackendRole(raw: string): UserRole {
   const normalized = raw.replace(/^ROLE_/i, "").toLowerCase();
   if (normalized.includes("superadmin")) return "superadmin";
   if (normalized.includes("admin")) return "admin";

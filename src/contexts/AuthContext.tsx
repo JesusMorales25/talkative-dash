@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import * as authService from '@/services/authService';
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import * as authService from "@/services/authService";
 
-export type UserRole = 'superadmin' | 'admin' | 'user';
+export type UserRole = "superadmin" | "admin" | "user";
 
 export interface User {
   id: string;
@@ -9,64 +9,72 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
+  company?: string;
 }
-
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
   logout: () => void;
-  isLoading: boolean;
+  isLoadingUser: boolean; // cargando usuario inicial
+  isAuthenticating: boolean; // login en curso
   hasPermission: (requiredRoles: UserRole[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
-useEffect(() => {
-  // Initialize from stored token if present
-  const initialize = async () => {
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-    setIsLoading(false);
+  // Carga inicial de usuario desde token
+  useEffect(() => {
+    const initialize = () => {
+      const currentUser = authService.getCurrentUser();
+      setUser(currentUser);
+      setIsLoadingUser(false);
+    };
+    initialize();
+  }, []);
+
+  // Login con actualización inmediata de user
+  const login = async (email: string, password: string, remember = false) => {
+    setIsAuthenticating(true);
+    try {
+      await authService.login(email, password, remember);
+      const currentUser = authService.getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      setUser(null);
+      throw error;
+    } finally {
+      setIsAuthenticating(false);
+    }
   };
-  initialize();
-}, []);
 
-const login = async (email: string, password: string, remember?: boolean) => {
-  setIsLoading(true);
-  try {
-    await authService.login(email, password, !!remember);
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-const logout = () => {
-  authService.logout();
-  setUser(null);
-};
+  const logout = () => {
+    authService.logout();
+    setUser(null);
+  };
 
   const hasPermission = (requiredRoles: UserRole[]): boolean => {
     if (!user) return false;
-    if (user.role === 'superadmin') return true;
+    if (user.role === "superadmin") return true;
     if (!requiredRoles || requiredRoles.length === 0) return true;
     return requiredRoles.includes(user.role);
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      login,
-      logout,
-      isLoading,
-      hasPermission,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        isLoadingUser,
+        isAuthenticating,
+        hasPermission,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -75,7 +83,7 @@ const logout = () => {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

@@ -8,8 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Lock, Mail } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLocation, useNavigate } from "react-router-dom";
 
 const schema = z.object({
   email: z.string().min(1, "El correo es requerido").email("Correo inválido"),
@@ -20,17 +20,25 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function Login() {
-  const { login, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from?.pathname || "/";
+  const { login, isAuthenticating } = useAuth();
+
+  interface LocationState {
+    from?: { pathname?: string };
+  }
+
+  const from = (location.state as LocationState)?.from?.pathname || "/";
   const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { remember: false } });
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { remember: false },
+  });
 
   useEffect(() => {
     document.title = "Iniciar sesión | CRM";
@@ -40,9 +48,14 @@ export default function Login() {
     setError(null);
     try {
       await login(values.email, values.password, values.remember);
-      navigate(from, { replace: true });
-    } catch (e: any) {
-      setError(e?.message || "No se pudo iniciar sesión");
+      navigate(from, { replace: true }); // solo si login fue bien
+    } catch (err) {
+      if (typeof err === "object" && err !== null && "response" in err) {
+        const e = err as { response?: { data?: { message?: string } } };
+        setError(e.response?.data?.message || "Error al iniciar sesión.");
+      } else {
+        setError("No se pudo iniciar sesión. Verifica tus credenciales.");
+      }
     }
   };
 
@@ -61,7 +74,7 @@ export default function Login() {
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Label htmlFor="email">Correo electrónico</Label>
               <div className="relative">
@@ -81,22 +94,21 @@ export default function Login() {
             </div>
 
             <div className="flex items-center justify-between py-1">
-              <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Checkbox {...register("remember")} />
+              <label className="flex items-center gap-2 text-sm text-muted-foreground" htmlFor="remember">
+                <Checkbox id="remember" {...register("remember")} />
                 Mantener sesión iniciada
               </label>
-              {/* <a className="text-sm text-primary hover:underline" href="#">¿Olvidaste tu contraseña?</a> */}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting || isLoading}>
-              {(isSubmitting || isLoading) && <Loader2 className="animate-spin" />}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || isAuthenticating}
+            >
+              {(isSubmitting || isAuthenticating) && <Loader2 className="animate-spin mr-2" />}
               Iniciar sesión
             </Button>
           </form>
-
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            Consejo: configura tu API en localStorage con la clave <code>api_url</code> (p.ej. http://localhost:8080)
-          </p>
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { ConversationsChart } from "@/components/ConversationsChart";
 import { LeadsChart } from "@/components/LeadsChart";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import api from "@/utils/axios";
 
 // Tipos de datos esperados desde la API
 type LeadPorEstado = {
@@ -30,13 +31,13 @@ export const Dashboard = () => {
       try {
         // ✅ Tipamos cada solicitud con el tipo de dato esperado
         const [leadsHoyRes, leadsEstadoRes, conversHoyRes, conversDiaRes, tiempoRespRes, totalContac] = await Promise.all([
-          axios.get<{ total: number }>("http://localhost:8081/api/leads/total-hoy"),
-          axios.get<LeadPorEstado[]>("http://localhost:8081/api/leads/por-estado"),
-          axios.get<number>("http://localhost:8081/api/conversaciones/hoy"),
-          axios.get<ConversacionPorDia[]>("http://localhost:8081/api/conversaciones/por-dia"),
-          axios.get<{ tiempo_promedio_min: number }>("http://localhost:8081/api/conversaciones/tiempo-promedio-respuesta"),
-					axios.get<number>("http://localhost:8081/api/conversaciones/total-contactos")
-        ]);
+					api.get<{ total: number }>("/api/leads/total-hoy"),
+					api.get<LeadPorEstado[]>("/api/leads/por-estado"),
+					api.get<number>("/api/conversaciones/hoy"),
+					api.get<ConversacionPorDia[]>("/api/conversaciones/por-dia"),
+					api.get<{ tiempo_promedio_min: number }>("/api/conversaciones/tiempo-promedio-respuesta"),
+					api.get<number>("/api/conversaciones/total-contactos")
+				]);
 
         // ✅ Ahora no hay conflicto con los setters
         setLeads(typeof leadsHoyRes.data.total === "number" ? leadsHoyRes.data.total : 0);

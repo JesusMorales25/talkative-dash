@@ -23,23 +23,53 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
+       <BrowserRouter>
+					<Routes>
+						{/* Rutas públicas */}
+						<Route path="/login" element={<Login />} />
 
-            <Route element={<ProtectedRoute><ResponsiveLayout><Outlet /></ResponsiveLayout></ProtectedRoute>}>
-              <Route path="/" element={<Index />} />
-              <Route path="/leads" element={<Leads />} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/reportes" element={<Reports />} />
-              <Route path="/configuracion" element={<Settings />} />
-              <Route path="/usuarios" element={<Users />} />
-            </Route>
+						{/* Rutas protegidas - requieren autenticación */}
+						<Route
+							element={
+								<ProtectedRoute>
+									<ResponsiveLayout>
+										<Outlet />
+									</ResponsiveLayout>
+								</ProtectedRoute>
+							}
+						>
+							<Route path="/" element={<Index />} />
+							<Route path="/leads" element={<Leads />} />
+							<Route path="/chat" element={<Chat />} />
+							<Route path="/reportes" element={<Reports />} />
+							
+							{/* Rutas con roles */}
+							<Route
+								path="/configuracion"
+								element={
+									<ProtectedRoute requiredRoles={['admin', 'superadmin']}>
+										<Settings />
+									</ProtectedRoute>
+								}
+							/>
+							<Route
+								path="/usuarios"
+								element={
+									<ProtectedRoute requiredRoles={['admin', 'superadmin']}>
+										<Users />
+									</ProtectedRoute>
+								}
+							/>
+						</Route>
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+						{/* Catch all */}
+						<Route path="*" element={<NotFound />} />
+					</Routes>
+				</BrowserRouter>
+
+
+
+
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>

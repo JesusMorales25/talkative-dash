@@ -24,7 +24,7 @@ import { useAuth, UserRole } from "@/contexts/AuthContext";
 interface NavigationItem {
   name: string;
   href: string;
-  icon: any;
+  icon: React.ElementType;
   requiredRoles: UserRole[];
   enabled: boolean;
 }
